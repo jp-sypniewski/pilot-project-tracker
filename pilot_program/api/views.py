@@ -6,8 +6,21 @@ from pilot_program.api.serializers import (PilotProgramSerializer,
 
 
 class TaskListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        pilot_pk = self.kwargs.get('pilot_pk')
+        pilot_program = generics.get_object_or_404(PilotProgram, pk=pilot_pk)
+
+        queryset = Task.objects.filter(pilot_program=pilot_program)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        pilot_pk = self.kwargs.get('pilot_pk')
+        pilot_program = generics.get_object_or_404(PilotProgram, pk=pilot_pk)
+
+        serializer.save(pilot_program=pilot_program)
 
 
 class TaskDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
